@@ -180,8 +180,9 @@
   
   
   <!-- Fixed Ecomart link -->
-  <a href="storygame.html" class="nav-btn">StoryTime</a>
+  <a href="storytime.html" class="nav-btn">StoryTime</a>
   <a href="ecomart.html" class="nav-btn">Ecomart</a>
+  <a href="vision.html" class="nav-btn">EcoVision</a>
  
   
 </div>
@@ -411,6 +412,22 @@ let gameCtx = null; let gameLoopId = null; let currentTopic = null;
 function stopGameIfAny(){ if(gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; } window.removeEventListener('keydown', globalKeyHandler); if(window._snakeTimer) { clearTimeout(window._snakeTimer); window._snakeTimer = null; } }
 
 function initGameForTopic(topic){ gameCanvas = document.getElementById('gameCanvas'); gameCtx = gameCanvas.getContext('2d'); gameCtx.clearRect(0,0,gameCanvas.width,gameCanvas.height); if(topic === 'water'){ gameHelp.textContent = 'Controls: Left / Right arrows to move bucket. Catch drops (+2 pts)'; initWaterGame(); } else if(topic === 'agriculture'){ gameHelp.textContent = 'Controls: Arrow keys to move snake. Eat crops (+5 pts)'; initSnakeGame(); } else if(topic === 'energy'){ gameHelp.textContent = 'Controls: Left/Right to move rocket, Space to shoot. Pop balloons (+3 pts)'; initRocketGame(); } else { gameHelp.textContent = 'This topic currently shows information only.'; const ctx = gameCtx; const c = gameCanvas; ctx.fillStyle = '#0a290f'; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle = '#9edb8a'; ctx.font = '16px system-ui'; ctx.fillText('No game for this topic', 20, 40); } }
+
+learnMoreBtn.addEventListener('click', () => {
+  if (!currentTopic) return;
+  
+  const topicUrls = {
+    water: 'water.html',
+    agriculture: 'tree.html',
+    energy: 'energy.html',
+    forest: 'forest.html'
+  };
+  
+  const url = topicUrls[currentTopic];
+  if (url) {
+    window.location.href = url;
+  }
+});
 
 /* WATER GAME (bucket) */
 function initWaterGame() {
