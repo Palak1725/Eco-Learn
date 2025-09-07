@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%8F%9E%EF%B8%8F%3C/text%3E%3C/svg%3E">
+  <title>EcoVision - Gamified Environmental Education</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom right, #b6e07f, #dcfce7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 10px;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 40px;
+      border-radius: 25px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      width: 95%;
+      max-width: 700px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .gradient-text {
+      background: linear-gradient(45deg, #2563eb, #16a34a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: #6b7280;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
+    .main-section {
+      background: linear-gradient(135deg, #f0f9ff, #ecfeff);
+      padding: 30px;
+      border-radius: 20px;
+      margin-top: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    .main-section h2 {
+      color: #1e293b;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #video {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      margin: 20px 0;
+      background: #000;
+    }
+
+    #canvas {
+      display: none;
+    }
+
+    .camera-controls {
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: linear-gradient(45deg, #16a34a, #15803d);
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(45deg, #f59e0b, #d97706);
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-secondary:hover {
+      box-shadow: 0 8px 25px rgba(245, 158, 11, 0.6);
+    }
+
+    .captured-image {
+      max-width: 100%;
+      max-height: 400px;
+      border-radius: 15px;
+      margin: 20px 0;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .ai-analysis {
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      border: 2px solid #3b82f6;
+      border-radius: 15px;
+      padding: 25px;
+      margin-top: 25px;
+      text-align: left;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .ai-analysis h3 {
+      color: #1e40af;
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.4rem;
+    }
+
+    .ai-analysis p {
+      line-height: 1.6;
+      color: #374151;
+      margin-bottom: 15px;
+    }
+
+    .ai-analysis strong {
+      color: #1f2937;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      color: #6b7280;
+      font-size: 1.1rem;
+      padding: 30px;
+    }
+
+    .spinner {
+      width: 25px;
+      height: 25px;
+      border: 3px solid #e5e7eb;
+      border-top: 3px solid #16a34a;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .demo-note {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 2px solid #f59e0b;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+      color: #92400e;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .error-message {
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border: 2px solid #ef4444;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      color: #dc2626;
+      line-height: 1.5;
+    }
+
+    .instructions {
+      background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+      border: 2px solid #10b981;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+      color: #065f46;
+      text-align: left;
+    }
+
+    .instructions h4 {
+      margin-top: 0;
+      color: #047857;
+    }
+
+    .instructions ul {
+      margin-bottom: 0;
+    }
+
+    .instructions li {
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 25px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .camera-controls {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .btn {
+        font-size: 0.95rem;
+      }
+    }
+    
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>
+      <span class="earth-emoji" style="font-size: 2.5rem;">🌍</span>
+      <span class="gradient-text">EcoVision Powered by Gemini AI</span>
+    </h1>
+    <p class="subtitle">AI-Powered Environmental Learning Assistant<br>
+    Discover the environmental impact of everyday objects</p>
+
+    <div class="main-section">
+      <h2>📸 Capture & Learn</h2>
+      
+      <div class="instructions">
+        <h4>📋 How to use EcoVision:</h4>
+        <ul>
+          <li>Click "Start Camera" to activate your device's camera</li>
+          <li>Point your camera at any environmental object (bottles, cans, paper, etc.)</li>
+          <li>Click "Capture & Analyze" to take a photo</li>
+          <li>Get instant AI-powered insights about environmental impact</li>
+          <li>Use "Take Picture Again" to capture another object</li>
+        </ul>
+      </div>
+
+      <div class="demo-note">
+        <strong>🤖 Demo Mode:</strong> This demonstration uses simulated AI responses to show the educational potential. In a production version, this would connect to Google Gemini's Vision API for real-time environmental analysis of captured objects.
+      </div>
+      
+      <div class="camera-section">
+        <video id="video" width="500" height="375" style="display: none;">
+          Your browser doesn't support video streaming.
+        </video>
+        <canvas id="canvas" width="500" height="375"></canvas>
+        
+        <div class="camera-controls">
+          <button class="btn" id="start-camera-btn" onclick="startCamera()">📽️ Start Camera</button>
+          <button class="btn" id="capture-btn" onclick="capturePhoto()" style="display: none;">📸 Capture & Analyze</button>
+          <button class="btn btn-secondary" id="retake-btn" onclick="retakePhoto()" style="display: none;">📷 Take Picture Again</button>
+        </div>
+        
+        <div id="captured-photo"></div>
+        <div id="ai-analysis"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let stream = null;
+    let video = null;
+    let canvas = null;
+    let ctx = null;
+
+    function initializeCamera() {
+      video = document.getElementById('video');
+      canvas = document.getElementById('canvas');
+      ctx = canvas.getContext('2d');
+    }
+
+    async function startCamera() {
+      const startBtn = document.getElementById('start-camera-btn');
+      const captureBtn = document.getElementById('capture-btn');
+      const retakeBtn = document.getElementById('retake-btn');
+      
+      try {
+        startBtn.textContent = "🎞️ Starting Camera...";
+        startBtn.disabled = true;
+
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: 'environment'
+          } 
+        });
+        
+        video.srcObject = stream;
+        video.style.display = 'block';
+        
+        await video.play();
+        
+        startBtn.style.display = 'none';
+        captureBtn.style.display = 'inline-block';
+        retakeBtn.style.display = 'none';
+        
+        // Clear any previous analysis
+        document.getElementById('captured-photo').innerHTML = '';
+        document.getElementById('ai-analysis').innerHTML = '';
+        
+      } catch (err) {
+        console.error('Error accessing camera:', err);
+        document.getElementById('ai-analysis').innerHTML = `
+          <div class="error-message">
+            <strong>❌ Camera Access Error:</strong> Unable to access your camera. Please check browser permissions and try again. Make sure you're using HTTPS or localhost.
+          </div>
+        `;
+        startBtn.textContent = "📽️ Start Camera";
+        startBtn.disabled = false;
+      }
+    }
+
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+      video.style.display = 'none';
+    }
+
+    function capturePhoto() {
+      if (!video || video.videoWidth === 0) {
+        alert('Camera not ready. Please wait a moment and try again.');
+        return;
+      }
+
+      // Draw video frame to canvas
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+      
+      // Convert to image data
+      const imageData = canvas.toDataURL('image/jpeg', 0.8);
+      
+      // Stop camera after capture
+      stopCamera();
+      
+      // Update button visibility
+      const captureBtn = document.getElementById('capture-btn');
+      const retakeBtn = document.getElementById('retake-btn');
+      
+      captureBtn.style.display = 'none';
+      retakeBtn.style.display = 'inline-block';
+      
+      // Display captured image
+      document.getElementById('captured-photo').innerHTML = `
+        <img src="${imageData}" class="captured-image" alt="Captured environmental object">
+      `;
+      
+      // Analyze with AI
+      analyzeImage(imageData);
+    }
+
+    function retakePhoto() {
+      const startBtn = document.getElementById('start-camera-btn');
+      const captureBtn = document.getElementById('capture-btn');
+      const retakeBtn = document.getElementById('retake-btn');
+      
+      // Reset button states
+      startBtn.style.display = 'inline-block';
+      startBtn.textContent = "📽️ Start Camera";
+      startBtn.disabled = false;
+      captureBtn.style.display = 'none';
+      retakeBtn.style.display = 'none';
+      
+      // Clear captured photo and analysis
+      document.getElementById('captured-photo').innerHTML = '';
+      document.getElementById('ai-analysis').innerHTML = '';
+    }
+
+    function analyzeImage(imageData) {
+      const analysisDiv = document.getElementById('ai-analysis');
+      
+      // Show loading state
+      analysisDiv.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          <span>🤖 AI is analyzing your image for environmental insights...</span>
+        </div>
+      `;
+      
+      // Simulate realistic AI processing time
+      setTimeout(() => {
+        const environmentalAnalyses = [
+          {
+            object: "Plastic Water Bottle",
+            analysis: `
+              <h3>🔍 Environmental Analysis: PET Plastic Bottle</h3>
+              <p><strong>🧪 Material Composition:</strong> Polyethylene Terephthalate (PET) with chemical formula (C₁₀H₈O₄)ₙ</p>
+              <p><strong>⏰ Decomposition Time:</strong> 450-1000 years in natural environments</p>
+              <p><strong>🌊 Environmental Impact:</strong> Releases microplastics into ecosystems, contributes to ocean pollution affecting marine life. Manufacturing requires significant petroleum resources.</p>
+              <p><strong>♻️ Recycling Potential:</strong> Highly recyclable! Can be turned into new bottles, polyester clothing, carpeting, and park benches.</p>
+              <p><strong>🌱 Eco Action:</strong> Always rinse before recycling. Look for the #1 recycling symbol. Consider switching to reusable bottles to reduce consumption.</p>
+              <p><strong>📊 Carbon Footprint:</strong> Approximately 82.8g CO₂ equivalent per 500ml bottle</p>
+            `
+          },
+          {
+            object: "Aluminum Beverage Can",
+            analysis: `
+              <h3>🔍 Environmental Analysis: Aluminum Can</h3>
+              <p><strong>🧪 Material Composition:</strong> 95% Aluminum (Al) with small amounts of magnesium and manganese for strength</p>
+              <p><strong>⏰ Decomposition Time:</strong> 80-200 years, but infinitely recyclable without quality loss!</p>
+              <p><strong>⚡ Energy Impact:</strong> Recycling aluminum uses 95% less energy than producing from raw bauxite ore</p>
+              <p><strong>♻️ Recycling Champion:</strong> Can be recycled and back on store shelves as new cans in just 60 days</p>
+              <p><strong>💰 Economic Value:</strong> One of the most valuable recyclable materials - recycling centers pay good money for aluminum</p>
+              <p><strong>🌱 Eco Action:</strong> Always recycle! One recycled can saves enough energy to power a TV for 3 hours.</p>
+            `
+          },
+          {
+            object: "Paper/Cardboard",
+            analysis: `
+              <h3>🔍 Environmental Analysis: Paper Product</h3>
+              <p><strong>🧪 Material Composition:</strong> Cellulose fibers (C₆H₁₀O₅)ₙ from wood pulp, plus various binding agents</p>
+              <p><strong>⏰ Decomposition Time:</strong> 2-6 weeks in compost conditions, 2-5 months in natural environment</p>
+              <p><strong>🌳 Resource Impact:</strong> Made from renewable trees, but requires significant water (2-13 liters per sheet) and energy in production</p>
+              <p><strong>♻️ Recycling Lifecycle:</strong> Can be recycled 5-7 times before fibers become too short to reuse</p>
+              <p><strong>🌱 Eco Action:</strong> Recycle clean paper, compost if soiled. Choose products with recycled content. Go digital when possible.</p>
+              <p><strong>🌿 Carbon Benefits:</strong> Stores carbon absorbed from atmospheric CO₂ during tree growth</p>
+            `
+          },
+          {
+            object: "Glass Container",
+            analysis: `
+              <h3>🔍 Environmental Analysis: Glass Container</h3>
+              <p><strong>🧪 Material Composition:</strong> Silicon dioxide (SiO₂) with sodium carbonate, limestone, and cullet (recycled glass)</p>
+              <p><strong>⏰ Decomposition Time:</strong> Over 1 million years, but 100% recyclable indefinitely!</p>
+              <p><strong>🌊 Environmental Benefits:</strong> Completely inert - doesn't leach chemicals into food or environment</p>
+              <p><strong>♻️ Perfect Recycling:</strong> Glass can be recycled endlessly without any quality loss - true circular economy material</p>
+              <p><strong>⚡ Energy Savings:</strong> Every ton of recycled glass saves 42 kWh of energy and reduces CO₂ emissions</p>
+              <p><strong>🌱 Eco Action:</strong> Reuse jars for storage. Recycle at glass collection points. Choose glass over plastic when possible.</p>
+            `
+          },
+          {
+            object: "Electronic Device/Component",
+            analysis: `
+              <h3>🔍 Environmental Analysis: Electronic Waste</h3>
+              <p><strong>🧪 Material Composition:</strong> Rare earth metals, precious metals (gold, silver), copper, lithium, plastics, and toxic materials</p>
+              <p><strong>⏰ Decomposition Impact:</strong> Plastics: 500-1000 years, metals persist indefinitely, toxic materials contaminate soil</p>
+              <p><strong>⚠️ Environmental Hazards:</strong> Contains lead, mercury, cadmium - can contaminate groundwater and harm ecosystems</p>
+              <p><strong>💎 Hidden Value:</strong> 1 ton of e-waste contains more gold than 17 tons of gold ore!</p>
+              <p><strong>♻️ Specialized Recycling:</strong> Requires certified e-waste recyclers to safely extract valuable materials</p>
+              <p><strong>🌱 Eco Action:</strong> Never throw in regular trash! Take to certified e-waste collection centers. Repair and upgrade when possible.</p>
+            `
+          },
+          {
+            object: "Organic Waste/Food",
+            analysis: `
+              <h3>🔍 Environmental Analysis: Organic Material</h3>
+              <p><strong>🧪 Material Composition:</strong> Complex organic compounds including cellulose, proteins, fats, and natural sugars</p>
+              <p><strong>⏰ Decomposition Time:</strong> 2-8 weeks in proper composting conditions</p>
+              <p><strong>🌱 Natural Cycle:</strong> Biodegradable material that returns nutrients to soil ecosystem</p>
+              <p><strong>🔄 Composting Benefits:</strong> Produces rich soil amendment and reduces methane emissions from landfills</p>
+              <p><strong>🌍 Climate Impact:</strong> Food waste in landfills produces methane, a potent greenhouse gas</p>
+              <p><strong>🌱 Eco Action:</strong> Start composting! Even kitchen scraps can become garden gold. Reduces waste and enriches soil naturally.</p>
+            `
+          }
+        ];
+        
+        // Select random analysis for demo
+        const randomAnalysis = environmentalAnalyses[Math.floor(Math.random() * environmentalAnalyses.length)];
+        
+        analysisDiv.innerHTML = `
+          <div class="ai-analysis">
+            ${randomAnalysis.analysis}
+            <p style="margin-top: 25px; padding-top: 20px; border-top: 2px solid #e2e8f0; font-style: italic; color: #6b7280;">
+              🌍 <strong>Keep exploring!</strong> Every object has an environmental story. Understanding these impacts helps us make better choices for our planet.
+            </p>
+          </div>
+        `;
+      }, 2500);
+    }
+
+    // Initialize camera functionality when page loads
+    window.addEventListener('load', initializeCamera);
+    
+    // Clean up camera when page is closed
+    window.addEventListener('beforeunload', () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    });
+  </script>
+</body>
+</html>
